@@ -183,4 +183,4 @@ components:
         playerId:
           maxLength: 1
           type: string
-          enum: [ X, O ]
+          enum: [ "X", "O", "-" ]
