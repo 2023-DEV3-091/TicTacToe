@@ -1,0 +1,186 @@
+openapi: 3.0.3
+info:
+  title: Tic-Tac-Toe Game APIs
+  description: Tic-Tac-Toe Game API specifications
+  version: 1.0.0
+servers:
+- url: http://localhost/bnp/tic-tac-toe
+tags:
+- name: TicTacToe
+paths:
+  /api/v1/start-game:
+    post:
+      tags:
+      - TicTacToe
+      summary: Initialize game state to start new game
+      operationId: initializeGameState
+      responses:
+        201:
+          description: Game initialized / created.
+          headers:
+            Location:
+              schema:
+                type: string
+              description: "Location of the created resource i.e. GET /v1/state/{game-id}"
+        400:
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+  /api/v1/state/{game-id}:
+    get:
+      tags:
+      - TicTacToe
+      summary: Get current state of game
+      operationId: getGameState
+      parameters:
+        - $ref: '#/components/parameters/GameId'
+      responses:
+        200:
+          description: Game state response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameStateResponse'
+        400:
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+  /api/v1/turn/{game-id}:
+    patch:
+      tags:
+      - TicTacToe
+      summary: Update game board to make a move / turn
+      operationId: performTurn
+      parameters:
+      - $ref: '#/components/parameters/GameId'
+      requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TurnRequest'
+      responses:
+        204:
+          description: No Content
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInfo'
+components:
+  parameters:
+    GameId:
+      name: game-id
+      schema:
+        type: string
+        pattern: UUID
+      in: path
+      required: true
+  schemas:
+    ErrorInfo:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    GameStatusEnum:
+      type: string
+      enum:
+        - 'Started'
+        - 'InProgress'
+        - 'Finished'
+      example: Finished
+    TurnRequest:
+      type: object
+      properties:
+        turnPositionInfo:
+          $ref: "#/components/schemas/Position"
+    GameStateResponse:
+      type: object
+      properties:
+        gameId:
+          type: string  
+          format: UUID
+          example: 5e8bac93-fbfd-46de-85be-58b7ddb30efa          
+        status:
+          $ref: "#/components/schemas/GameStatusEnum"
+        winner:
+          maxLength: 4
+          type: string
+          enum: [ X, O, DRAW]
+        board:
+          $ref: "#/components/schemas/BoardInfo"
+    BoardInfo:
+      type: object
+      properties:
+        positionInfoList:
+          type: array
+          items:
+            $ref: "#/components/schemas/Position"
+          description: List of positions having indices and playerIds mappings.
+          example:
+            - rowIndex: 0
+              columnIndex: 0
+              playerId: 'X'
+            - rowIndex: 0
+              columnIndex: 1
+              playerId: '0'
+            - rowIndex: 0
+              columnIndex: 2
+              playerId: 'X'
+            - rowIndex: 1
+              columnIndex: 0
+              playerId: 'X'
+            - rowIndex: 1
+              columnIndex: 1
+              playerId: '0'
+            - rowIndex: 1
+              columnIndex: 2
+              playerId: '0'
+            - rowIndex: 2
+              columnIndex: 0
+              playerId: 'X'
+            - rowIndex: 2
+              columnIndex: 1
+              playerId: 'X'
+            - rowIndex: 2
+              columnIndex: 2
+              playerId: '0'
+    Position:
+      type: object
+      properties:
+        rowIndex:
+          type: number
+          minimum: 0
+          maximum: 2
+        columnIndex:
+          type: number
+          minimum: 0
+          maximum: 2
+        playerId:
+          maxLength: 1
+          type: string
+          enum: [ X, O ]
