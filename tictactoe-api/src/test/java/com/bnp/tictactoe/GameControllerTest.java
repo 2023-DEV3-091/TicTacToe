@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.bnp.tictactoe.data.dto.GameStateResponse;
 import com.bnp.tictactoe.data.dto.GameStatusEnum;
 import com.bnp.tictactoe.data.dto.Position;
-import com.bnp.tictactoe.data.dto.TurnRequest;
+import com.bnp.tictactoe.features.game.info.TurnRequest;
 import com.bnp.tictactoe.model.context.GameContextHolder;
 import com.bnp.tictactoe.model.data.Game;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -153,12 +153,9 @@ public class GameControllerTest {
     //todo: below can be moved to DataProvider
     private TurnRequest getTurnRequest(Integer rowIndex, Integer colIndex, String playerId) {
         TurnRequest turnRequest = new TurnRequest();
-        Position position = new Position();
-        position.setPlayerId(Position.PlayerIdEnum.fromValue(playerId));
-        position.setRowIndex(rowIndex);
-        position.setColumnIndex(colIndex);
-        turnRequest.setTurnPositionInfo(position);
-
+        turnRequest.setPlayerId(Position.PlayerIdEnum.fromValue(playerId));
+        turnRequest.setRowIndex(rowIndex);
+        turnRequest.setColumnIndex(colIndex);
         return turnRequest;
     }
 }
