@@ -10,8 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.bnp.tictactoe.data.dto.GameStateResponse;
 import com.bnp.tictactoe.data.dto.GameStatusEnum;
+import com.bnp.tictactoe.data.dto.Position;
+import com.bnp.tictactoe.data.dto.TurnRequest;
 import com.bnp.tictactoe.model.context.GameContextHolder;
 import com.bnp.tictactoe.model.data.Game;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +22,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import java.util.UUID;
 
 @SpringBootTest
@@ -28,6 +30,9 @@ public class GameControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     public void initMocks() throws Exception {
@@ -83,30 +88,77 @@ public class GameControllerTest {
     }
 
     @Test
+    void testPerformTurn() throws Exception {
+        createNewGameState();
+        testPerformFirstTurnXShouldAlwaysGoFirst();
+        testPerformTurnSuccess();
+        testPerformTurnCannotPlayOnPlayedPosition();
+        testPerformTurnAlternateTurn();
+    }
+
+    public void createNewGameState() {
+        GameContextHolder GAME_CONTEXT = GameContextHolder.getInstance();
+        Game existingGame = new Game();
+        existingGame.setGameId(UUID.fromString("0ce3758e-5341-11ee-8c99-0242ac120002"));
+        existingGame.setStatus(GameStatusEnum.STARTED);
+        existingGame.setWinner(null);
+        existingGame.setBoard(new int[][]{{0,0,0},
+                                          {0,0,0},
+                                          {0,0,0}
+                                         });
+        GAME_CONTEXT.setGame(existingGame);
+    }
+
+    public void testPerformFirstTurnXShouldAlwaysGoFirst() throws Exception {
+        mockMvc.perform(patch("/api/v1/turn/0ce3758e-5341-11ee-8c99-0242ac120002")
+                        .content(objectMapper.writeValueAsString(getTurnRequest(1,1, "O")))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("TTT-08"))
+                .andExpect(jsonPath("$.message")
+                        .value("X turn should always goes first."));
+    }
+
     void testPerformTurnSuccess() throws Exception {
-        mockMvc.perform(patch("/api/v1/turn/5e8bac93-fbfd-46de-85be-58b7ddb30efa")
-                        .content(getTurnRequest())
+        mockMvc.perform(patch("/api/v1/turn/0ce3758e-5341-11ee-8c99-0242ac120002")
+                        .content(objectMapper.writeValueAsString(getTurnRequest(1,1, "X")))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isNoContent());
     }
 
-    @Test
-    void testPerformTurnOnSameBlock() throws Exception {
-        mockMvc.perform(patch("/api/v1/turn/5e8bac93-fbfd-46de-85be-58b7ddb30efa")
-                        .content(getTurnRequest())
+    public void testPerformTurnCannotPlayOnPlayedPosition() throws Exception {
+        mockMvc.perform(patch("/api/v1/turn/0ce3758e-5341-11ee-8c99-0242ac120002")
+                        .content(objectMapper.writeValueAsString(getTurnRequest(1,1, "O")))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print()).andExpect(status().is4xxClientError());
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("TTT-09"))
+                .andExpect(jsonPath("$.message")
+                        .value("Players cannot play on a played position."));
+    }
+
+    public void testPerformTurnAlternateTurn() throws Exception {
+        mockMvc.perform(patch("/api/v1/turn/0ce3758e-5341-11ee-8c99-0242ac120002")
+                        .content(objectMapper.writeValueAsString(getTurnRequest(1,2, "X")))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("TTT-10"))
+                .andExpect(jsonPath("$.message")
+                        .value("Players must take alternate turn."));
     }
 
 
     //todo: below can be moved to DataProvider
-    private String getTurnRequest() {
-        return "{\n"
-                + "  \"turnPositionInfo\": {\n"
-                + "    \"rowIndex\": 0,\n"
-                + "    \"columnIndex\": 0,\n"
-                + "    \"playerId\": \"X\"\n" +
-                "    }\n"
-                + "}";
+    private TurnRequest getTurnRequest(Integer rowIndex, Integer colIndex, String playerId) {
+        TurnRequest turnRequest = new TurnRequest();
+        Position position = new Position();
+        position.setPlayerId(Position.PlayerIdEnum.fromValue(playerId));
+        position.setRowIndex(rowIndex);
+        position.setColumnIndex(colIndex);
+        turnRequest.setTurnPositionInfo(position);
+
+        return turnRequest;
     }
 }
