@@ -77,7 +77,9 @@ public class GameControllerTest {
     void testGetGameStateNotFound() throws Exception {
         mockMvc.perform(get("/api/v1/state/5e8bac93-fbfd-46de-85be-58b7ddb30404"))
                 .andDo(print())
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("TTT-07"))
+                .andExpect(jsonPath("$.message").value("Game not found"));
     }
 
     @Test
