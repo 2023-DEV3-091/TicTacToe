@@ -34,7 +34,7 @@ public class GameController {
 
         String gameId = gameService.initializeGameState();
 
-        String gameLocation = "/api/v1/start-game" + gameId;
+        String gameLocation = "/api/v1/start-game/" + gameId;
 
         log.debug("Location: {}", gameLocation);
 
