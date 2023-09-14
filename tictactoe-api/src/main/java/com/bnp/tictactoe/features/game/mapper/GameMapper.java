@@ -65,4 +65,16 @@ public class GameMapper {
             return "-";
         }
     }
+
+    public int mapPlayerIdFromResponse(String playerId) {
+        if (playerId.equals("X")) {
+            return 1;
+        }
+        else if (playerId.equals("O")) {
+            return 2;
+        }
+        else {
+            return 0;
+        }
+    }
 }

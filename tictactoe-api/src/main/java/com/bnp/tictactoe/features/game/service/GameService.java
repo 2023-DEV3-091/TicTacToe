@@ -3,7 +3,11 @@ package com.bnp.tictactoe.features.game.service;
 import com.bnp.tictactoe.core.ApplicationError;
 import com.bnp.tictactoe.core.ApplicationException;
 import com.bnp.tictactoe.data.dto.GameStateResponse;
+import com.bnp.tictactoe.data.dto.GameStatusEnum;
+import com.bnp.tictactoe.features.game.info.TurnRequest;
 import com.bnp.tictactoe.features.game.mapper.GameMapper;
+import com.bnp.tictactoe.features.game.utils.BoardHelper;
+import com.bnp.tictactoe.features.game.validator.GameValidator;
 import com.bnp.tictactoe.model.context.GameContextHolder;
 import com.bnp.tictactoe.model.data.Game;
 import org.slf4j.Logger;
@@ -21,9 +25,13 @@ public class GameService {
     private static GameContextHolder GAME_CONTEXT = GameContextHolder.getInstance();
 
     private final GameMapper gameMapper;
+    private final GameValidator gameValidator;
+    private final BoardHelper boardHelper;
 
-    public GameService(GameMapper gameMapper) {
+    public GameService(GameMapper gameMapper, GameValidator gameValidator, BoardHelper boardHelper) {
         this.gameMapper = gameMapper;
+        this.gameValidator = gameValidator;
+        this.boardHelper = boardHelper;
     }
 
     public String initializeGameState() {
@@ -46,5 +54,37 @@ public class GameService {
             throw new ApplicationException(ApplicationError.GAME_NOT_FOUND);
         }
         return gameMapper.toGameStateResponse(game);
+    }
+
+    public void performTurn(UUID gameId, TurnRequest turnRequest) {
+
+        Game existingGameState = GAME_CONTEXT.getGames().get(gameId);
+
+        gameValidator.validateTurnRequest(gameId, turnRequest, existingGameState);
+
+        performTurnAndSaveState(turnRequest, existingGameState);
+
+        if(hasPlayerWin(turnRequest, existingGameState)) {
+            existingGameState.setStatus(GameStatusEnum.FINISHED);
+            existingGameState.setWinner(GameStateResponse.WinnerEnum.valueOf(
+                    turnRequest.getPlayerId().getValue()));
+
+        } else if (boardHelper.isAllSquaresFilled(existingGameState.getBoard())) {
+            existingGameState.setStatus(GameStatusEnum.FINISHED);
+            existingGameState.setWinner(GameStateResponse.WinnerEnum.DRAW);
+        }
+    }
+
+    private void performTurnAndSaveState(TurnRequest turnRequest, Game existingGameState) {
+        existingGameState.getMoves().add(turnRequest.getPlayerId().getValue());
+        existingGameState
+                .getBoard()[turnRequest.getRowIndex() - 1]
+                           [turnRequest.getColumnIndex() - 1]
+                = gameMapper.mapPlayerIdFromResponse(turnRequest.getPlayerId().getValue());
+    }
+
+    private boolean hasPlayerWin(TurnRequest turnRequest, Game existingGameState) {
+        return boardHelper.playerHasThreeInARow(existingGameState.getBoard(),
+                gameMapper.mapPlayerIdFromResponse(turnRequest.getPlayerId().getValue()));
     }
 }
