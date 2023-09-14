@@ -4,4 +4,4 @@ spring:
 server:
   port: ${tictactoe.server.port:8080}
   servlet:
-    context-path: ${tictactoe.server.context-path:/tictactoe}
+    context-path: ${tictactoe.server.context-path:/bnp/tic-tac-toe}
