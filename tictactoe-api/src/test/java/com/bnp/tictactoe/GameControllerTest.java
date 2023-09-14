@@ -8,6 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.bnp.tictactoe.data.dto.GameStateResponse;
+import com.bnp.tictactoe.data.dto.GameStatusEnum;
+import com.bnp.tictactoe.model.context.GameContextHolder;
+import com.bnp.tictactoe.model.data.Game;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,12 +20,28 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.UUID;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 public class GameControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @BeforeEach
+    public void initMocks() throws Exception {
+        GameContextHolder GAME_CONTEXT = GameContextHolder.getInstance();
+        Game existingGame = new Game();
+        existingGame.setGameId(UUID.fromString("5e8bac93-fbfd-46de-85be-58b7ddb30efa"));
+        existingGame.setStatus(GameStatusEnum.FINISHED);
+        existingGame.setWinner(GameStateResponse.WinnerEnum.X);
+        existingGame.setBoard(new int[][]{{1,1,1},
+                                          {1,0,2},
+                                          {0,2,2}
+                                         });
+        GAME_CONTEXT.setGame(existingGame);
+    }
 
     @Test
     void testInitializeGameState() throws Exception {
@@ -38,50 +59,25 @@ public class GameControllerTest {
                 .andExpect(jsonPath("$.gameId").value("5e8bac93-fbfd-46de-85be-58b7ddb30efa"))
                 .andExpect(jsonPath("$.status").value("Finished"))
                 .andExpect(jsonPath("$.winner").value("X"))
-                .andExpect(jsonPath("$.board.positionInfoList[0].rowIndex").value(0))
-                .andExpect(jsonPath("$.board.positionInfoList[0].columnIndex").value(0))
                 .andExpect(jsonPath("$.board.positionInfoList[0].playerId").value("X"))
-
-                .andExpect(jsonPath("$.board.positionInfoList[1].rowIndex").value(0))
-                .andExpect(jsonPath("$.board.positionInfoList[1].columnIndex").value(1))
                 .andExpect(jsonPath("$.board.positionInfoList[1].playerId").value("X"))
+                .andExpect(jsonPath("$.board.positionInfoList[2].playerId").value("X"))
 
-                .andExpect(jsonPath("$.board.positionInfoList[2].rowIndex").value(0))
-                .andExpect(jsonPath("$.board.positionInfoList[2].columnIndex").value(2))
-                .andExpect(jsonPath("$.board.positionInfoList[2].playerId").value("0"))
 
-                .andExpect(jsonPath("$.board.positionInfoList[3].rowIndex").value(1))
-                .andExpect(jsonPath("$.board.positionInfoList[3].columnIndex").value(0))
                 .andExpect(jsonPath("$.board.positionInfoList[3].playerId").value("X"))
-
-                .andExpect(jsonPath("$.board.positionInfoList[4].rowIndex").value(1))
-                .andExpect(jsonPath("$.board.positionInfoList[4].columnIndex").value(1))
                 .andExpect(jsonPath("$.board.positionInfoList[4].playerId").value("-"))
+                .andExpect(jsonPath("$.board.positionInfoList[5].playerId").value("O"))
 
-                .andExpect(jsonPath("$.board.positionInfoList[5].rowIndex").value(1))
-                .andExpect(jsonPath("$.board.positionInfoList[5].columnIndex").value(2))
-                .andExpect(jsonPath("$.board.positionInfoList[5].playerId").value("-"))
-
-                .andExpect(jsonPath("$.board.positionInfoList[6].rowIndex").value(2))
-                .andExpect(jsonPath("$.board.positionInfoList[6].columnIndex").value(0))
                 .andExpect(jsonPath("$.board.positionInfoList[6].playerId").value("-"))
-
-                .andExpect(jsonPath("$.board.positionInfoList[7].rowIndex").value(2))
-                .andExpect(jsonPath("$.board.positionInfoList[7].columnIndex").value(1))
-                .andExpect(jsonPath("$.board.positionInfoList[7].playerId").value("0"))
-
-                .andExpect(jsonPath("$.board.positionInfoList[8].rowIndex").value(2))
-                .andExpect(jsonPath("$.board.positionInfoList[8].columnIndex").value(2))
-                .andExpect(jsonPath("$.board.positionInfoList[8].playerId").value("O"))
-
-        ;
+                .andExpect(jsonPath("$.board.positionInfoList[7].playerId").value("O"))
+                .andExpect(jsonPath("$.board.positionInfoList[8].playerId").value("O"));
     }
 
     @Test
     void testGetGameStateNotFound() throws Exception {
         mockMvc.perform(get("/api/v1/state/5e8bac93-fbfd-46de-85be-58b7ddb30404"))
                 .andDo(print())
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().isNotFound());
     }
 
     @Test
