@@ -142,44 +142,18 @@ components:
             $ref: "#/components/schemas/Position"
           description: List of positions having indices and playerIds mappings.
           example:
-            - rowIndex: 0
-              columnIndex: 0
-              playerId: 'X'
-            - rowIndex: 0
-              columnIndex: 1
-              playerId: '0'
-            - rowIndex: 0
-              columnIndex: 2
-              playerId: 'X'
-            - rowIndex: 1
-              columnIndex: 0
-              playerId: 'X'
-            - rowIndex: 1
-              columnIndex: 1
-              playerId: '0'
-            - rowIndex: 1
-              columnIndex: 2
-              playerId: '0'
-            - rowIndex: 2
-              columnIndex: 0
-              playerId: 'X'
-            - rowIndex: 2
-              columnIndex: 1
-              playerId: 'X'
-            - rowIndex: 2
-              columnIndex: 2
-              playerId: '0'
+            - playerId: 'X'
+            - playerId: '0'
+            - playerId: 'X'
+            - playerId: 'X'
+            - playerId: '0'
+            - playerId: '0'
+            - playerId: 'X'
+            - playerId: 'X'
+            - playerId: '0'
     Position:
       type: object
       properties:
-        rowIndex:
-          type: number
-          minimum: 0
-          maximum: 2
-        columnIndex:
-          type: number
-          minimum: 0
-          maximum: 2
         playerId:
           maxLength: 1
           type: string
