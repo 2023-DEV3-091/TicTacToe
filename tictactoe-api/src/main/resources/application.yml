@@ -5,3 +5,5 @@ server:
   port: ${tictactoe.server.port:8080}
   servlet:
     context-path: ${tictactoe.server.context-path:/bnp/tic-tac-toe}
+log:
+  path: ${tictactoe.log.path:app/log}
