@@ -8,6 +8,7 @@ import org.slf4j.event.Level;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
@@ -110,9 +111,8 @@ public class ApplicationExceptionHandler {
             log.warn("Exception: {} ", exception.getMessage());
         }
 
-        String errorMessage = exception.getBindingResult().getFieldErrors().stream()
-                .map(error -> "Parameter '" + error.getField() + "' " + error.getDefaultMessage())
-                .collect(Collectors.toList()).get(0);
+        FieldError fieldError = exception.getBindingResult().getFieldErrors().get(0);
+        String errorMessage = "Parameter '" + fieldError.getField() + "' " + fieldError.getDefaultMessage();
 
         ErrorInfo error = new ErrorInfo();
         error.setCode(ApplicationError.INVALID_PARAMETER.getCode());
