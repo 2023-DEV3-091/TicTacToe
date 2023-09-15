@@ -1,7 +1,5 @@
 package com.bnp.tictactoe.features.game.service;
 
-import com.bnp.tictactoe.core.ApplicationError;
-import com.bnp.tictactoe.core.ApplicationException;
 import com.bnp.tictactoe.data.dto.GameStateResponse;
 import com.bnp.tictactoe.data.dto.GameStatusEnum;
 import com.bnp.tictactoe.features.game.info.TurnRequest;
@@ -13,8 +11,6 @@ import com.bnp.tictactoe.model.data.Game;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
-
 import java.util.UUID;
 
 @Service
