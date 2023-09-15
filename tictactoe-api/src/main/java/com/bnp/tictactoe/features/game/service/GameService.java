@@ -62,10 +62,12 @@ public class GameService {
             existingGameState.setStatus(GameStatusEnum.FINISHED);
             existingGameState.setWinner(GameStateResponse.WinnerEnum.valueOf(
                     turnRequest.getPlayerId().getValue()));
+            log.info("Game finished with winner {}", turnRequest.getPlayerId().getValue());
 
         } else if (boardHelper.isAllSquaresFilled(existingGameState.getBoard())) {
             existingGameState.setStatus(GameStatusEnum.FINISHED);
             existingGameState.setWinner(GameStateResponse.WinnerEnum.DRAW);
+            log.info("Game finished in draw");
         }
     }
 
