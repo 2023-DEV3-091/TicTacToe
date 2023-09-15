@@ -27,8 +27,7 @@ public class GameValidator {
 
         validateTurnsAndPositions(turnRequest, game);
     }
-
-    //todo: use this function in GET API service
+    
     public void validateGameId(UUID gameId, Game game) {
         if(ObjectUtils.isEmpty(game)) {
             log.error("Game with ID {} does not exist", gameId);

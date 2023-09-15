@@ -49,10 +49,8 @@ public class GameService {
 
         Game game = GAME_CONTEXT.getGames().get(gameId);
 
-        if(ObjectUtils.isEmpty(game)) {
-            log.error("Game with ID {} does not exist", gameId);
-            throw new ApplicationException(ApplicationError.GAME_NOT_FOUND);
-        }
+        gameValidator.validateGameId(gameId, game);
+
         return gameMapper.toGameStateResponse(game);
     }
 
